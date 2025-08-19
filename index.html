@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mini GitHub Content Loader</title>
+</head>
+<body>
+  <h1>Content Loader</h1>
+
+  <select id="folderDropdown">
+    <option value="">Select Folder</option>
+    <option value="content">content</option>
+  </select>
+
+  <div id="contents"></div>
+
+  <script>
+    const repoOwner = "YOUR_GITHUB_USERNAME";
+    const repoName = "my-content-repo";
+    const folderName = "content";
+
+    const folderDropdown = document.getElementById("folderDropdown");
+    const contentsDiv = document.getElementById("contents");
+
+    folderDropdown.addEventListener("change", async () => {
+      const selectedFolder = folderDropdown.value;
+      if (!selectedFolder) return;
+
+      contentsDiv.innerHTML = "Loading...";
+
+      try {
+        // 1. Fetch number.txt
+        const numberRes = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${selectedFolder}/number.txt`);
+        const numberText = await numberRes.text();
+        const maxNumber = parseInt(numberText.trim());
+
+        contentsDiv.innerHTML = "";
+
+        // 2. Load contents in reverse order
+        for (let i = maxNumber; i >= 1; i--) {
+          const contentRes = await fetch(`https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/${selectedFolder}/content${i}.html`);
+          const contentText = await contentRes.text();
+
+          const contentBlock = document.createElement("div");
+          contentBlock.style.border = "1px solid #ccc";
+          contentBlock.style.margin = "10px";
+          contentBlock.style.padding = "10px";
+          contentBlock.textContent = contentText;
+
+          contentsDiv.appendChild(contentBlock);
+        }
+
+      } catch (err) {
+        console.error(err);
+        contentsDiv.innerHTML = "Failed to load content.";
+      }
+    });
+  </script>
+</body>
+  </html>
